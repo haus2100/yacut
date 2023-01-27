@@ -51,7 +51,7 @@ def create_short_url():
 
 
 @app.route("/api/id/<string:short_id>/")
-def get_short_url(short_id: str) -> tuple[Response, int]:
+def get_short_url(short_id: str):
     urlmap = URLMap.query.filter_by(short=short_id).first()
     if urlmap is None:
         raise APIRequestError(const.SHORT_ID_NOT_FOUND, HTTPStatus.NOT_FOUND)
