@@ -28,7 +28,7 @@ class URLMap(db.Model):
         return cls.query.filter_by(short=short_id).first() is None
 
     @classmethod
-    def get_unique_short_id(cls, length = const.SHORT_ID_LENGTH):
+    def get_unique_short_id(cls, length=const.SHORT_ID_LENGTH):
         while True:
             short_id = cls.generate_short_id(length)
             if cls.is_free_short_id(short_id):

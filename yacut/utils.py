@@ -1,8 +1,7 @@
 from functools import wraps
-from typing import Callable, Iterable
+from typing import Iterable
 
 from flask import request
-from flask_sqlalchemy.model import Model
 from .exceptions import APIRequestError
 
 from . import db
