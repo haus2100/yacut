@@ -25,7 +25,7 @@ CUSTOM_ID_VALIDATORS = {
 
 @app.route("/api/id/", methods=("POST",))
 @required_fields(("url",))
-def create_short_url() -> tuple[Response, int]:
+def create_short_url():
     data = request.get_json()
 
     custom_id = data.get("custom_id")
