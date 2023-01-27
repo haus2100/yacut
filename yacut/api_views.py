@@ -1,7 +1,7 @@
 import re
 from http import HTTPStatus
 
-from flask import Response, jsonify, request, url_for
+from flask import jsonify, request, url_for
 
 from yacut import app
 from yacut import constants as const
