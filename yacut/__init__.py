@@ -17,4 +17,4 @@ class IdModel(Model):
 db = SQLAlchemy(app, model_class=IdModel)
 migrate = Migrate(app, db=db)
 
-from . import api_views, error_handlers, views
+from . import api_views, error_handlers, views, error_handlers

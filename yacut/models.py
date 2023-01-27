@@ -7,7 +7,6 @@ from . import constants as const
 
 
 class URLMap(db.Model):
-    """URL mapping model."""
 
     original = db.Column(db.String, nullable=False)
     short = db.Column(

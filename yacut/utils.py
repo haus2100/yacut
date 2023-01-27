@@ -15,7 +15,7 @@ def save(obj):
 
 def required_fields(
     fields: Iterable,
-    message=(const.REQUIRED_FIELD),
+    message=(const.URL_IS_REQUIRED_FIELD),
 ):
     def decorator(func):
         @wraps(func)
