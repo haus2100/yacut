@@ -4,8 +4,8 @@ from typing import Iterable
 from flask import request
 from .exceptions import APIRequestError
 
-from . import db
-from . import constants as const
+from yacut import db
+from yacut import constants as const
 
 
 def save(obj):

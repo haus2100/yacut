@@ -9,8 +9,8 @@ from wtforms.validators import (
     ValidationError,
 )
 
-from . import constants as const
-from .models import URLMap
+from yacut import constants as const
+from yacut.models import URLMap
 
 
 class URLForm(FlaskForm):

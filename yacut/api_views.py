@@ -3,11 +3,11 @@ from http import HTTPStatus
 
 from flask import Response, jsonify, request, url_for
 
-from . import app
-from . import constants as const
-from .exceptions import APIRequestError
-from .models import URLMap
-from .utils import required_fields, save
+from yacut import app
+from yacut import constants as const
+from yacut.exceptions import APIRequestError
+from yacut.models import URLMap
+from yacut.utils import required_fields, save
 
 
 CUSTOM_ID_VALIDATORS = {

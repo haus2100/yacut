@@ -2,8 +2,8 @@ import random
 import string
 from datetime import datetime
 
-from . import db
-from . import constants as const
+from yacut import db
+from yacut import constants as const
 
 
 class URLMap(db.Model):

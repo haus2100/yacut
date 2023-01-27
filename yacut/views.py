@@ -1,9 +1,9 @@
 from flask import redirect, render_template, url_for
 
-from . import app
-from .forms import URLForm
-from .models import URLMap
-from .utils import save
+from yacut import app
+from yacut.forms import URLForm
+from yacut.models import URLMap
+from yacut.utils import save
 
 
 @app.route("/", methods=("GET", "POST"))
