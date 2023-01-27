@@ -1,12 +1,20 @@
+import sqlalchemy as sa
 from flask import Flask
 from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import Model, SQLAlchemy
 
 from settings import Config
 
 app = Flask(__name__)
 app.config.from_object(Config)
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+
+
+class IdModel(Model):
+
+    id = sa.Column(sa.Integer, primary_key=True)
+
+
+db = SQLAlchemy(app, model_class=IdModel)
+migrate = Migrate(app, db=db)
 
 from . import api_views, error_handlers, views

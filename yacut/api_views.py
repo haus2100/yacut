@@ -1,48 +1,58 @@
+import re
 from http import HTTPStatus
-from re import fullmatch
 
-from flask import jsonify, request
+from flask import Response, jsonify, request, url_for
 
-from . import app, db
-from .error_handlers import InvalidAPIUsage
+from . import app
+from . import constants as const
+from .exceptions import APIRequestError
 from .models import URLMap
-from .utils import get_unique_short_id
+from .utils import required_fields, save
 
 
-INVALID_SHORT_LINK = 'Указано недопустимое имя для короткой ссылки'
-MISSING_REQUEST_BODY = 'Отсутствует тело запроса'
-SHORT_ID_NOT_FOUND = 'Указанный id не найден'
-URL_IS_REQUIRED_FIELD = '"url" является обязательным полем!'
+CUSTOM_ID_VALIDATORS = {
+    lambda value: (len(value) > const.CUSTOM_ID_LENGTH): (
+        const.INVALID_SHORT_LINK
+    ),
+    lambda value: (re.match(const.CUSTOM_ID_REGEX, value) is None): (
+        const.INVALID_SHORT_LINK
+    ),
+    lambda value: not URLMap.is_free_short_id(value): (
+        const.NOT_UNIQUE_CUSTOM_ID
+    ),
+}
 
 
-@app.route('/api/id/', methods=['POST'])
-def create_url():
-    PATTERN = r'^[a-zA-Z0-9]{1,16}$'
-
+@app.route("/api/id/", methods=("POST",))
+@required_fields(("url",))
+def create_short_url() -> tuple[Response, int]:
     data = request.get_json()
-    if not data:
-        raise InvalidAPIUsage(MISSING_REQUEST_BODY)
-    if not data.get('url'):
-        raise InvalidAPIUsage(URL_IS_REQUIRED_FIELD)
-    short_id = data.get('custom_id')
-    if not short_id:
-        data['custom_id'] = get_unique_short_id()
-    elif URLMap.query.filter_by(short=short_id).first():
-        raise InvalidAPIUsage(f'Имя "{short_id}" уже занято.')
-    elif not fullmatch(PATTERN, short_id):
-        raise InvalidAPIUsage(INVALID_SHORT_LINK)
-    url_map = URLMap()
-    url_map.from_dict(data)
-    db.session.add(url_map)
-    db.session.commit()
-    return jsonify(url_map.to_dict()), HTTPStatus.CREATED.value
+
+    custom_id = data.get("custom_id")
+    if custom_id is not None:
+        for func, message in CUSTOM_ID_VALIDATORS.items():
+            if func(custom_id):
+                raise APIRequestError(message.format(custom_id=custom_id))
+    else:
+        data["custom_id"] = URLMap.get_unique_short_id()
+
+    urlmap = URLMap(original=data.get("url"), short=data.get("custom_id"))
+    save(urlmap)
+
+    response = {
+        "url": urlmap.original,
+        "short_link": url_for(
+            "mapping_redirect",
+            short_id=urlmap.short,
+            _external=True,
+        ),
+    }
+    return jsonify(response), HTTPStatus.CREATED
 
 
-@app.route('/api/id/<string:short_id>/', methods=['GET'])
-def get_url(short_id):
-    url_map = URLMap.query.filter_by(short=short_id).first()
-    if not url_map:
-        raise InvalidAPIUsage(
-            SHORT_ID_NOT_FOUND, HTTPStatus.NOT_FOUND.value
-        )
-    return jsonify(url=url_map.original), HTTPStatus.OK.value
+@app.route("/api/id/<string:short_id>/")
+def get_short_url(short_id: str) -> tuple[Response, int]:
+    urlmap = URLMap.query.filter_by(short=short_id).first()
+    if urlmap is None:
+        raise APIRequestError(const.SHORT_ID_NOT_FOUND, HTTPStatus.NOT_FOUND)
+    return jsonify({"url": urlmap.original}), HTTPStatus.OK
